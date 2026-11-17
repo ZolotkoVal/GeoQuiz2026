@@ -27,6 +27,13 @@ private val QuizSaver = listSaver<QuizState, Int>(
 fun GeoQuizApp() {
     MaterialTheme(colorScheme = lightColorScheme(primary = Color(0xFF6200EE))) {
         var state by rememberSaveable(stateSaver = QuizSaver) { mutableStateOf(QuizState()) }
+        var showResults by rememberSaveable { mutableStateOf(false) }
+        val onAnswer: (Boolean) -> Unit = { selection ->
+            if (!state.answered) {
+                state = state.answer(selection)
+                if (state.finished) showResults = true
+            }
+        }
         Scaffold(
             topBar = {
                 Box(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.primary)
@@ -44,10 +51,10 @@ fun GeoQuizApp() {
                 Box(Modifier.fillMaxWidth().height(48.dp)) {
                     if (!state.answered) {
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Button(onClick = { state = state.answer(true) }, shape = RoundedCornerShape(4.dp)) {
+                            Button(onClick = { onAnswer(true) }, shape = RoundedCornerShape(4.dp)) {
                                 Text(stringResource(R.string.answer_true))
                             }
-                            Button(onClick = { state = state.answer(false) }, shape = RoundedCornerShape(4.dp)) {
+                            Button(onClick = { onAnswer(false) }, shape = RoundedCornerShape(4.dp)) {
                                 Text(stringResource(R.string.answer_false))
                             }
                         }
@@ -59,8 +66,21 @@ fun GeoQuizApp() {
                         modifier = Modifier.align(Alignment.End), shape = RoundedCornerShape(4.dp)) {
                         Text(stringResource(R.string.next))
                     }
+                } else if (!showResults) {
+                    Text(stringResource(R.string.result_score, state.score, questions.size),
+                        Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
                 }
             }
+        }
+        if (showResults && state.finished) {
+            AlertDialog(
+                onDismissRequest = { showResults = false },
+                title = { Text(stringResource(R.string.results_title)) },
+                text = { Text(stringResource(R.string.result_score, state.score, questions.size)) },
+                confirmButton = {
+                    TextButton(onClick = { showResults = false }) { Text(stringResource(R.string.ok)) }
+                }
+            )
         }
     }
 }

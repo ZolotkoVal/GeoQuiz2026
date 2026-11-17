@@ -3,4 +3,7 @@
     <string name="answer_true">TRUE</string>
     <string name="answer_false">FALSE</string>
     <string name="next">NEXT ›</string>
+    <string name="results_title">Quiz results</string>
+    <string name="result_score">Correct answers: %1$d / %2$d</string>
+    <string name="ok">OK</string>
 </resources>
